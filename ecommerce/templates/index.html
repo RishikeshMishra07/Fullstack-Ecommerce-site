@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+ {% block title %}Home{% endblock title %} 
+ {% block content %}
+
+<h1>Welcome to Shop Cart</h1>
+
+{% endblock content %}
+{% block body %} 
+{% load static %}
+
+<!-- ======= Portfolio Section ======= -->
+<section id="portfolio" class="portfolio">
+  <div class="container">
+    {% for message in messages %}
+    <div
+      class="alert alert-{{message.tags}} alert-dismissible fade show"
+      role="alert"
+    >
+      <strong>{{message}}</strong>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="close"
+      ></button>
+    </div>
+    {% endfor %}
+
+    <div class="section-title">
+      <h2>Welcome to Shop Cart</h2>
+      <h3>Check our <span>Products</span></h3>
+      <p>
+        Ut possimus qui ut temporibus culpa velit eveniet modi omnis est
+        adipisci expedita at voluptas atque vitae autem.
+      </p>
+    </div>
+
+    {% for product, range, nSlides in allProds %}
+  
+    <h3 class="my-3 text-center tect-success bg-light">
+      {{product.0.category}} Flashsale
+    </h3>
+
+    <div class="container">
+    <div class="row">
+    {% for i in product %}
+        <div class="col-md-3 mt-3">
+          <img
+            src='/media/{{i.image}}''
+            class="card-img-top"
+            alt="not found"
+            height="200px"
+            width="150px"
+          />
+          <div class="card-body">
+            <h5 class="card-title mt-2" id="namepr{{i.id}}">
+              {{i.product_name}}
+            </h5>
+            <p class="card-text">{{i.desc|slice:"0:53"}}...</p>
+            <h6 class="card-title mb-3">
+              Price:<span id="pricepr{{i.id}}">{{i.price}}</span>
+            </h6>
+            <span id="divpr{{i.id}}" class="divpr">
+              <button id="pr{{i.id}}" class="btn btn-danger cart btn-sm mt-0">
+                AddToCart
+              </button>
+            </span>
+            <a href="/media/{{i.image}}"
+              ><button class="btn btn-success btn-sm cart">View</button></a
+            >
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+<!-- End Portfolio Section -->
+
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> {% endcomment %}
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script> {% endcomment %}
+
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+crossorigin="anonymous"></script> {% endcomment %}
+
+<script>
+
+  
+  
+  $.noConflict();
+  jQuery(document).ready(function($) { 
+    if (localStorage.getItem('cart') == null) {
+      var cart = {};
+    } else {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      updateCart(cart);
+    }
+    var clearCartButton = document.getElementById('clearCart');
+    if (clearCartButton) {
+      clearCartButton.addEventListener('click', function() {
+        clearCart();
+      });
+    } else {
+      console.error('Button with ID "clearCart" not found.');
+    }
+    // Add or increment code
+  $('.divpr').on('click', 'button.cart', function () {
+  // Your cart button click code here
+    var idstr = this.id.toString();
+    
+    var qty, name, price;
+
+    if (cart[idstr] !== undefined) {
+      qty = cart[idstr][0] + 1;
+    } else {
+    qty = 1;
+    name = $('#name' + idstr).html();
+    price = $('#price' + idstr).html();
+    cart[idstr] = [qty, name, price];
+    }
+    updateCart(cart);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    $('#cart').html(Object.keys(cart).length);
+    $('#popcart').popover('hide');
+    });
+
+    // Add popover to cart
+    $('#popcart').popover({
+      html: true,
+      content: function() {
+        return getPopoverContent(cart);
+      }
+    });
+
+
+
+    function getPopoverContent(cart) {
+      var popStr = "<div><h5>Cart for your items in my shopping cart</h5><div class='mx-2 my-2'>";
+      var index = 1;
+      for (var item in cart) {
+        popStr += "<b>" + index + "</b>. ";
+        popStr += cart[item][1] + "<b>" + cart[item][0] + "</b>Qty<br>";
+        index++;
+      }
+      popStr += "</div> <a class='btn btn-success' href='/checkout'>Checkout</a></div>";
+      return popStr;
+    }
+
+    function clearCart() {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      for (var item in cart) {
+        $('#div' + item).html("<button id='" + item + "' class='btn btn-danger cart'>Add to Cart</button>");
+      }
+      localStorage.clear();
+      cart = {};
+      updateCart(cart);
+      $('#popcart').popover('hide');
+    }
+
+    function updateCart(cart) {
+      var sum = 0;
+      for (var item in cart) {
+        sum += cart[item][0];
+        $('#div' + item).html("<button id='minus" + item + "' class='btn btn-success minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-success plus'> + </button>");
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      $('#cart').html(sum);
+    }
+
+    $('#clearCart').click(function() {
+      console.log('Button clicked!');
+      clearCart();
+    });
+    // If plus or minus button is clicked, change the cart and display value
+    $('.divpr').on('click', 'button.minus', function() {
+      var a = this.id.slice(7);
+      cart['pr' + a][0] = Math.max(0, cart['pr' + a][0] - 1);
+      $('#valpr' + a).html(cart['pr' + a][0]);
+      updateCart(cart);
+    });
+
+    $('.divpr').on('click', 'button.plus', function() {
+      var a = this.id.slice(6);
+      cart['pr' + a][0]++;
+      $('#valpr' + a).html(cart['pr' + a][0]);
+      updateCart(cart);
+    });
+  });
+</script> 
+
+
+
+
+
+{% endblock body %}

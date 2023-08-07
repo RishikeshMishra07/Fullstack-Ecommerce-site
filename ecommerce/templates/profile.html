@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %} Profile Page{% endblock title %}
+{% block body %}
+<section id="portfolio" class="portfolio">
+    <div class="container">
+        <h1>My Profile</h1>
+        <table class="table table-info table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Products</th>
+                    <th scope="col">Amount Paid</th>
+                    <th scope="col">Payment Status</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Delivery Status</th>
+                    <th scope="col">Delivered</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <th scope="row">{{ item.oid }}</th>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.item_json }}</td>
+                    <td>{{ item.amount }}</td>
+                    <td>{{ item.paymentstatus }}</td>
+                    <td>{{ item.address1 }}</td>
+                    <td>{{ item.phone }}</td>
+
+                    {% for update in status %}
+                    {% if update.order_id == item.oid %}
+                    
+                    <td>{{ update.update_desc }}</td>
+                    <td>{{ update.delivered }}</td>
+                    {% if update.delivered %}
+                    <td><i class="fa-solid fa-circle-check"></i> Delivered</td>
+                    {% else %}
+                    <td><i class="fa-solid fa-truck"></i> Not Delivered</td>
+                    {% endif %}
+                    <td>{{ update.timestamp }}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock body %}
